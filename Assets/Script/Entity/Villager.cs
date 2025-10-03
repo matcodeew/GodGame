@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -8,10 +9,21 @@ public class Villager : Entity
     public TaskType currentPersonalTask = TaskType.NONE;
     private TaskType interruptedTasks = TaskType.NONE;
 
+    public override bool Initialize()
+    {
+        agent.speed = entityStats.speed.GetCurrentSpeed();
+        return base.Initialize();
+    }
+   
+    private void Update()
+    {
+        UpdateFullnessValue();
+        UpdateTirednessValue();
+    }
+
     #region UpdateStats
     private void UpdateTaskByFullness()
     {
-        print(entityStats.hanger.GetCurrentFullness() >= entityStats.hanger.GetMaxFullness() / 2);
         if (entityStats.hanger.GetCurrentFullness() >= entityStats.hanger.GetMaxFullness() / 2 && currentCityTask == TaskType.NONE)
         {
             currentPersonalTask = TaskType.Eat;
@@ -29,6 +41,7 @@ public class Villager : Entity
                 entityStats.hanger.GetMaxFullness() - entityStats.hanger.GetMaxFullness() / 4 && currentCityTask != TaskType.NONE)
         {
             interruptedTasks = currentCityTask;
+            currentCityTask = TaskType.NONE;
             currentPersonalTask = TaskType.Eat;
 
             //Stop currentTask
@@ -69,6 +82,7 @@ public class Villager : Entity
             if (entityStats.tiredness.IsTired())
             {
                 interruptedTasks = currentCityTask;
+                currentCityTask = TaskType.NONE;
                 currentPersonalTask = TaskType.Sleep;
 
                 TimerManager.StartTimer(10.0f /*GameManager.DayTotalTime*/, new Action(() =>
@@ -96,37 +110,5 @@ public class Villager : Entity
 
         entityStats.speed.SetCurrentSpeed(newSpeed);
     }
-
-
-    public override bool Initialize()
-    {
-        agent.speed = entityStats.speed.GetCurrentSpeed();
-        return base.Initialize();
-    }
     #endregion
-
-    private void Update()
-    {
-        UpdateFullnessValue();
-        UpdateTirednessValue();
-
-
-    }
-
-
-    private void ExecuteCityTask()
-    {
-        switch (currentCityTask)
-        {
-            case (TaskType.Pray):
-
-                break;
-
-            case (TaskType.GatherFood):
-                break;
-
-            case (TaskType.GatherWood):
-                break;
-        }
-    }
 }

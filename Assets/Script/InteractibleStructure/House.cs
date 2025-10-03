@@ -27,7 +27,7 @@ public class House : InteractibleStructure, IBuildable
         base.Interact(villager);
         for (int i = 0; i < resident.Count; i++)
         {
-            print($"resident n{i} is {resident[i].name}");
+            print($"resident n.{i} is {resident[i].name}");
         }
     }
 

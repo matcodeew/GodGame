@@ -1,5 +1,6 @@
 public enum EventType
 {
     NONE,
-    UPDATE_UINbsCitizen
+    UPDATE_UINbsCitizen,
+    DestroyInteractibleStruct,
 }

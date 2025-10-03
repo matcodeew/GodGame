@@ -1,10 +1,12 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
-public class Three : InteractibleStructure
+public class Tree : InteractibleStructure
 {
     [SerializeField] private int maxWoods;
+    [SerializeField] private RessourceType ressourceType = RessourceType.Wood;
     private int currentUsedWoods;
-
 
     public override void Interact(Villager villager)
     {
@@ -17,8 +19,8 @@ public class Three : InteractibleStructure
         }
 
         currentUsedWoods++;
-        //Give one Wood To Villagers
-        //villager.AddRessource(RessourceType.Woods);
+
+        villager.AddRessource(ressourceType);
     }
 
     public override void DestroyStructure()
