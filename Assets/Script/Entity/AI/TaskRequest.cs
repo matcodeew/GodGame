@@ -1,6 +1,8 @@
 using UnityEngine;
 
-public class TaskRequest : MonoBehaviour
+
+[System.Serializable]
+public class TaskRequest
 {
     public TaskType taskType;
     public int priority;

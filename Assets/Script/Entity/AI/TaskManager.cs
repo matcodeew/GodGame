@@ -5,7 +5,7 @@ public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance { get; private set; }
 
-    private List<TaskRequest> taskQueue = new();
+    [SerializeField] private List<TaskRequest> taskQueue = new();
 
     private void Awake()
     {
@@ -20,11 +20,25 @@ public class TaskManager : MonoBehaviour
     public void AddTask(TaskType type, int priority)
     {
         TaskRequest newTask = new TaskRequest { taskType = type, priority = priority };
+
+        if (taskQueue.Count > 0)
+        {
+            foreach (var task in taskQueue)
+            {
+                if (task.taskType == newTask.taskType)
+                {
+                    return;
+                }
+                continue;
+            }
+        }
         taskQueue.Add(newTask);
 
-        // Tri par priorité
+
         taskQueue.Sort((a, b) => a.priority.CompareTo(b.priority));
     }
+
+    public bool HaveTask() => taskQueue.Count > 0;
 
     public TaskRequest GetNextTask()
     {
