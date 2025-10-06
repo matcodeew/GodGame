@@ -32,7 +32,7 @@ public class City : MonoBehaviour
     private void Awake()
     {
         Initialize();
-        AddCitizen(villager is null ? null : villager);
+        AddCitizen(villager);
     }
 
     public void Initialize()
@@ -43,6 +43,15 @@ public class City : MonoBehaviour
         cityStats.currentWoods = 10;
         cityStats.maxWoods = 100;
         cityStats.currentFaith = 0;
+    }
+
+    [ContextMenu("TEST_SpawnVillager")]
+
+    public void TEST_SpawnVillager()
+    {
+        Villager newVillager = Instantiate(villager);
+        newVillager.Initialize();
+        AddCitizen(newVillager);
     }
 
     public void AddCitizen(Villager villager)
@@ -77,7 +86,7 @@ public class City : MonoBehaviour
     {
         elapseTime += Time.deltaTime;
 
-        if (elapseTime > orderTime)
+        if (elapseTime > orderTime) //Refresh Order each 5 sec 
         {
             PostResourceTask(cityStats.currentFoods, cityStats.maxFoods, TaskType.GatherFood);
             PostResourceTask(cityStats.currentWoods, cityStats.maxWoods, TaskType.GatherWood);

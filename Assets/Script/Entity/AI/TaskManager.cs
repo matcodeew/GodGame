@@ -3,23 +3,18 @@ using UnityEngine;
 
 public class TaskManager : MonoBehaviour
 {
-    public static TaskManager Instance { get; private set; }
+    public static TaskManager Instance;
 
     [SerializeField] private List<TaskRequest> taskQueue = new();
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        if (Instance is null) Instance = this;
     }
 
     public void AddTask(TaskType type, int priority)
     {
-        TaskRequest newTask = new TaskRequest { taskType = type, priority = priority };
+        TaskRequest newTask = new TaskRequest(type, priority);
 
         if (taskQueue.Count > 0)
         {
@@ -36,6 +31,8 @@ public class TaskManager : MonoBehaviour
 
 
         taskQueue.Sort((a, b) => a.priority.CompareTo(b.priority));
+
+        EventBus.Publish(EventType.NewTaskCreated, newTask);
     }
 
     public bool HaveTask() => taskQueue.Count > 0;

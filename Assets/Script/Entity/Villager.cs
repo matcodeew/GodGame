@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,30 +8,26 @@ public class Villager : Entity
     public TaskType currentPersonalTask = TaskType.NONE;
     [HideInInspector] public TaskType interruptedTasks = TaskType.NONE;
 
-    [SerializeField, Range(0, 10)] private float takeOtherOrderTime = 1.5f;
-    private float deltaTime;
-
     public override bool Initialize()
     {
         agent.speed = entityStats.speed.GetCurrentSpeed();
         return base.Initialize();
     }
 
-    private void Start()
+    #region Init Event
+    private void OnEnable()
     {
-        if (TaskManager.Instance is null) throw new ArgumentNullException(nameof(TaskManager.Instance), "Instance of TaskManager is NULL");
+        EventBus.Subscribe<TaskRequest>(EventType.NewTaskCreated, AttributeCityTask);
     }
-
-    private void Update()
+    private void OnDisable()
     {
-        deltaTime += Time.deltaTime;
-        if (deltaTime >= takeOtherOrderTime)
-        {
-            deltaTime = 0.0f;
-            if (currentCityTask == TaskType.NONE && TaskManager.Instance.HaveTask())
-            {
-                currentCityTask = TaskManager.Instance.GetNextTask().taskType;
-            }
-        }
+        EventBus.Unsubscribe<TaskRequest>(EventType.NewTaskCreated, AttributeCityTask);
+    }
+    #endregion
+    private void AttributeCityTask(TaskRequest request)
+    {
+        if (request == null || currentCityTask != TaskType.NONE) return;
+
+        currentCityTask = TaskManager.Instance.GetNextTask().taskType;
     }
 }

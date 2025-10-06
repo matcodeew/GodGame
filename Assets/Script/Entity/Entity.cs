@@ -12,18 +12,13 @@ public class Entity : MonoBehaviour
         {
             agent = NavAgent;
         }
-
-        if (!Initialize())
-        {
-            print($"{entityStats.GetEntityName()} Initialize Function Throw");
-        }
+        Initialize();
     }
     public virtual bool Initialize()
     {
         print($"Initialize {entityStats.GetEntityName()} ");
         return true;
     }
-
     public void GoTo(Vector3 target)
     {
         agent.SetDestination(target);

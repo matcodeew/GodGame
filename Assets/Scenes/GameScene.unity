@@ -119,135 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &205409553 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4984405645907764698, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
+--- !u!114 &167946978 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8065378118851276089, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
   m_PrefabInstance: {fileID: 464272403}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &205409554
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 205409553}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 752721ce629a2154c80bdfdca17fe682, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityStats:
-    entityName: Villager(1)
-    health:
-      CurrentHealth: 100
-      MaxHealth: 100
-    speed:
-      CurrentMovementSpeed: 3.5
-      MaxMovementSpeed: 5
-      MinMovementSpeed: 3.5
-    hanger:
-      CurrentHanger: 0
-      MaxHanger: 100
-      HangerTimeRate: 2.5
-    tiredness:
-      CurrentTiredness: 0
-      MaxTiredness: 100
-      TirednessTimeRate: 1
-  agent: {fileID: 0}
-  currentCityTask: 0
-  currentPersonalTask: 0
-  interruptedTasks: 0
-  takeOtherOrderTime: 0
---- !u!114 &205409559
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 205409553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_OverrideArea: 0
-  m_Area: 0
-  m_OverrideGenerateLinks: 0
-  m_GenerateLinks: 0
-  m_IgnoreFromBuild: 1
-  m_ApplyToChildren: 1
-  m_AffectedAgents: ffffffff
---- !u!114 &205409564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 205409553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60f50f3f3cf4975459b5639e244e622c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UpdateStatsComponent
-  eatingTime: 2.5
-  SpeepingTime: 10
---- !u!1 &257286295
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 257286297}
-  - component: {fileID: 257286296}
-  m_Layer: 0
-  m_Name: City
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &257286296
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257286295}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b5e9a0d892378049960c79d17a2f4a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::City
-  AllCitizen: []
-  freeCitizen: []
-  orderTime: 5
-  cityStats:
-    nbsVillagers: 0
-    currentFoods: 0
-    maxFoods: 0
-    currentWoods: 0
-    maxWoods: 0
-    currentFaith: 0
-    maxFaith: 0
-  villager: {fileID: 205409554}
---- !u!4 &257286297
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257286295}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.26166, y: 0.5, z: 8.37319}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -567,16 +449,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4984405645907764698, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 205409554}
-    - targetCorrespondingSourceObject: {fileID: 4984405645907764698, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 205409559}
-    - targetCorrespondingSourceObject: {fileID: 4984405645907764698, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 205409564}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d69b8527c150e9d41b978d2cda052954, type: 3}
 --- !u!1 &621730718
 GameObject:
@@ -771,7 +644,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1861029857
+--- !u!1 &839772840
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -779,52 +652,109 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1861029859}
-  - component: {fileID: 1861029858}
-  - component: {fileID: 1861029860}
+  - component: {fileID: 839772842}
+  - component: {fileID: 839772841}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: CityManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1861029858
+--- !u!114 &839772841
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861029857}
-  m_Enabled: 0
+  m_GameObject: {fileID: 839772840}
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa8930f6fd29d5e42ba665c40813535b, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b5e9a0d892378049960c79d17a2f4a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  AllTree: []
---- !u!4 &1861029859
+  m_EditorClassIdentifier: Assembly-CSharp::City
+  AllCitizen: []
+  freeCitizen: []
+  orderTime: 5
+  cityStats:
+    nbsVillagers: 0
+    currentFoods: 0
+    maxFoods: 0
+    currentWoods: 0
+    maxWoods: 0
+    currentFaith: 0
+    maxFaith: 0
+  villager: {fileID: 167946978}
+--- !u!4 &839772842
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861029857}
+  m_GameObject: {fileID: 839772840}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.9503052, y: 12.362245, z: 3.6466498}
+  m_LocalPosition: {x: -1.26167, y: 0.5, z: 8.37319}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1861029860
+--- !u!1 &1041590165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1041590167}
+  - component: {fileID: 1041590168}
+  - component: {fileID: 1041590169}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1041590167
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041590165}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.26167, y: 0.5, z: 8.37319}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1041590168
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861029857}
-  m_Enabled: 0
+  m_GameObject: {fileID: 1041590165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa8930f6fd29d5e42ba665c40813535b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GodGame.GameManager
+  AllTree:
+  - {fileID: 0}
+--- !u!114 &1041590169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1041590165}
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f525e3e1b6df9ba4992140deaca670a3, type: 3}
   m_Name: 
@@ -839,5 +769,5 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 464272403}
   - {fileID: 621730722}
-  - {fileID: 1861029859}
-  - {fileID: 257286297}
+  - {fileID: 1041590167}
+  - {fileID: 839772842}
