@@ -1,41 +1,52 @@
+using GodGame;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TaskManager : MonoBehaviour
 {
-    public static TaskManager Instance;
+    public static TaskManager Instance { get; private set; }
 
-    [SerializeField] private List<TaskRequest> taskQueue = new();
+    [SerializeField] private readonly List<TaskRequest> taskQueue = new();
 
     private void Awake()
     {
-        if (Instance is null) Instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
     public void AddTask(TaskType type, int priority)
     {
-        TaskRequest newTask = new TaskRequest(type, priority);
-
-        if (taskQueue.Count > 0)
+        if (!CanAddTask(type))
         {
-            foreach (var task in taskQueue)
-            {
-                if (task.taskType == newTask.taskType)
-                {
-                    return;
-                }
-                continue;
-            }
+            RemoveTasksOfType(type);
+            return;
         }
-        taskQueue.Add(newTask);
 
+        if (taskQueue.Exists(t => t.taskType == type))
+            return;
 
+        taskQueue.Add(new TaskRequest(type, priority));
         taskQueue.Sort((a, b) => a.priority.CompareTo(b.priority));
-
-        EventBus.Publish(EventType.NewTaskCreated, newTask);
     }
 
-    public bool HaveTask() => taskQueue.Count > 0;
+    private bool CanAddTask(TaskType type)
+    {
+        return type switch
+        {
+            TaskType.GatherWood => GameManager.Instance.AllTree?.Count > 0,
+            TaskType.GatherFood => GameManager.Instance.AllFoodBush?.Count > 0,
+            TaskType.Pray => true,
+            TaskType.MakeBaby => true,
+            _ => false
+        };
+    }
+
+    private void RemoveTasksOfType(TaskType type)
+    {
+        taskQueue.RemoveAll(t => t.taskType == type);
+    }
+
+    public bool HasTasks => taskQueue.Count > 0;
 
     public TaskRequest GetNextTask()
     {

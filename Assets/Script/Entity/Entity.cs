@@ -8,14 +8,14 @@ public class Entity : MonoBehaviour
 
     private void Awake()
     {
+        //Initialize();
+    }
+    public virtual bool Initialize(City city)
+    {
         if (TryGetComponent<NavMeshAgent>(out NavMeshAgent NavAgent))
         {
             agent = NavAgent;
         }
-        Initialize();
-    }
-    public virtual bool Initialize()
-    {
         print($"Initialize {entityStats.GetEntityName()} ");
         return true;
     }

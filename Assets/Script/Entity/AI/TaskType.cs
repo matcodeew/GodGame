@@ -6,5 +6,6 @@ public enum TaskType
     GatherWood,
     Pray,
     Eat,
-    Sleep
+    Sleep,
+    MakeBaby,
 }

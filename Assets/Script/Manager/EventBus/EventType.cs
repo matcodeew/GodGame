@@ -4,4 +4,5 @@ public enum EventType
     UPDATE_UINbsCitizen,
     DestroyInteractibleStruct,
     NewTaskCreated,
+    VillagerTakeRessource,
 }
