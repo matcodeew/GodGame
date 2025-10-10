@@ -5,9 +5,8 @@ public class UpdateStatsComponent : MonoBehaviour
 {
     private Villager villager;
 
-    [Header("Timers")]
-    [SerializeField] private float eatingDuration = 5f;
-    [SerializeField] private float sleepingDuration = 10f;
+    [SerializeField] private float eatingTime;
+    [SerializeField] private float SpeepingTime;
 
     private void Awake()
     {
@@ -16,116 +15,98 @@ public class UpdateStatsComponent : MonoBehaviour
 
     private void Update()
     {
-        UpdateFullness();
-        UpdateTiredness();
+        UpdateFullnessValue();
+        UpdateTirednessValue();
     }
 
-    #region Fullness / Hunger
-    private void UpdateFullness()
+    #region UpdateStats
+    private void UpdateTaskByAnger()
     {
-        // Ignore si le villageois est déjà en train de manger ou dormir
-        if (villager.currentPersonalTask == TaskType.Eat || villager.currentPersonalTask == TaskType.Sleep)
-            return;
-
-        var hunger = villager.entityStats.hanger;
-
-        // Met à jour la faim progressivement
-        hunger.SetCurrentFullness(
-            hunger.GetCurrentFullness() + Time.deltaTime * hunger.GetFullnessTimeRate()
-        );
-
-        // Si il a faim, on déclenche le comportement associé
-        if (hunger.IsAnger())
+        if (villager.entityStats.hanger.GetCurrentFullness() >= villager.entityStats.hanger.GetMaxFullness() / 2 && villager.currentCityTask == TaskType.NONE)
         {
-            Debug.Log($"?? {villager.entityStats.GetEntityName()} a faim !");
-            hunger.SetCurrentFullness(0);
+            villager.currentPersonalTask = TaskType.Eat;
+
+            //Take Food //civilisation.SetFood(-1);
+            //GoTo(FoodStorage.location);
+
+
+            villager.entityStats.hanger.SetCurrentFullness(0);
+
+
+            TimerManager.StartTimer(eatingTime, new Action(() => villager.currentPersonalTask = TaskType.NONE));
         }
-
-        HandleEatingBehavior();
-    }
-
-    private void HandleEatingBehavior()
-    {
-        var hunger = villager.entityStats.hanger;
-
-        bool hasCityTask = villager.currentCityTask != TaskType.NONE;
-
-        // Seuils de faim
-        float halfFullness = hunger.GetMaxFullness() / 2f;
-        float almostFull = hunger.GetMaxFullness() * 0.75f;
-
-        // Pas de tâche = mange tranquille
-        if (hunger.GetCurrentFullness() >= halfFullness && !hasCityTask)
-        {
-            StartEating(() => villager.currentPersonalTask = TaskType.NONE);
-        }
-        // En tâche active = interrompt pour manger
-        else if (hunger.GetCurrentFullness() >= almostFull && hasCityTask)
-        {
-            TaskType oldTask = villager.currentCityTask;
-
-            villager.interruptedTasks = oldTask;
-            villager.currentCityTask = TaskType.NONE;
-
-            StartEating(() =>
-            {
-                villager.currentPersonalTask = TaskType.NONE;
-                villager.currentCityTask = oldTask;
-                villager.interruptedTasks = TaskType.NONE;
-            });
-        }
-    }
-
-    private void StartEating(Action onFinish)
-    {
-        villager.currentPersonalTask = TaskType.Eat;
-        villager.GoTo(Vector3.zero); // TODO : changer vers un vrai point "table / maison"
-        villager.entityStats.hanger.SetCurrentFullness(0);
-
-        TimerManager.StartTimer(eatingDuration, onFinish);
-    }
-    #endregion
-
-    #region Tiredness
-    private void UpdateTiredness()
-    {
-        // Empêche la fatigue de se mettre à jour pendant le sommeil ou la reproduction
-        if (villager.currentPersonalTask == TaskType.Sleep || villager.currentCityTask == TaskType.MakeBaby)
-            return;
-
-        var tired = villager.entityStats.tiredness;
-
-        // Met à jour la fatigue progressivement
-        tired.SetCurrentTiredness(
-            tired.GetCurrentTiredness() + Time.deltaTime * tired.GetTirednessTimeRate()
-        );
-
-        if (tired.IsTired())
+        else if (villager.entityStats.hanger.GetCurrentFullness() >=
+                villager.entityStats.hanger.GetMaxFullness() - villager.entityStats.hanger.GetMaxFullness() / 4 && villager.currentCityTask != TaskType.NONE)
         {
             villager.interruptedTasks = villager.currentCityTask;
             villager.currentCityTask = TaskType.NONE;
-            villager.currentPersonalTask = TaskType.Sleep;
+            villager.currentPersonalTask = TaskType.Eat;
 
-            villager.GoTo(Vector3.zero); // TODO : lit ou maison
+            //Stop currentTask
+            //Take Food //civilisation.SetFood(-1);
+            //GoTo(FoodStorage.location);
 
-            TimerManager.StartTimer(sleepingDuration, new Action(() =>
+            villager.entityStats.hanger.SetCurrentFullness(0);
+
+            TimerManager.StartTimer(eatingTime, new Action(() =>
             {
-                tired.SetCurrentTiredness(0);
-                villager.currentPersonalTask = TaskType.NONE;
+                villager.currentCityTask = villager.interruptedTasks;
+                villager.interruptedTasks = TaskType.NONE;
             }));
         }
-
-        UpdateSpeedBasedOnTiredness();
     }
-    private void UpdateSpeedBasedOnTiredness()
+    public void UpdateFullnessValue()
     {
-        var tired = villager.entityStats.tiredness;
-        var speed = villager.entityStats.speed;
+        if (villager.currentPersonalTask == TaskType.Eat || villager.currentPersonalTask == TaskType.Sleep) return;
 
-        float ratio = Mathf.Clamp01(tired.GetCurrentTiredness() / tired.GetMaxTiredness());
-        float newSpeed = Mathf.Lerp(speed.GetMaxSpeed(), speed.GetMinSpeed(), ratio);
+        if (villager.entityStats.hanger.IsAnger())
+        {
+            print($"Entity {villager.entityStats.GetEntityName()}, is Anger");
+            villager.entityStats.hanger.SetCurrentFullness(0);
+        }
+        villager.entityStats.hanger.SetCurrentFullness(
+            Time.deltaTime * villager.entityStats.hanger.GetFullnessTimeRate() + villager.entityStats.hanger.GetCurrentFullness() * 1/*GameManager.tickSpeed*/);
 
-        speed.SetCurrentSpeed(newSpeed);
+        UpdateTaskByAnger();
+    }
+
+    public void UpdateTirednessValue()
+    {
+        if (villager.currentPersonalTask != TaskType.Sleep)
+        {
+            villager.entityStats.tiredness.SetCurrentTiredness(
+          Time.deltaTime * villager.entityStats.tiredness.GetTirednessTimeRate() + villager.entityStats.tiredness.GetCurrentTiredness() * 1/*GameManager.tickSpeed*/);
+
+            if (villager.entityStats.tiredness.IsTired())
+            {
+                villager.interruptedTasks = villager.currentCityTask;
+                villager.currentCityTask = TaskType.NONE;
+                villager.currentPersonalTask = TaskType.Sleep;
+
+                TimerManager.StartTimer(SpeepingTime /*GameManager.DayTotalTime*/, new Action(() =>
+                {
+                    villager.entityStats.tiredness.SetCurrentTiredness(0);
+                    villager.currentPersonalTask = TaskType.NONE;
+                }));
+            }
+            UpdateSpeedWithTiredness();
+        }
+    }
+
+    private void UpdateSpeedWithTiredness()
+    {
+        float currentTired = villager.entityStats.tiredness.GetCurrentTiredness();
+        float maxTired = villager.entityStats.tiredness.GetMaxTiredness();
+
+        float tirednessRatio = Mathf.Clamp01(currentTired / maxTired);
+
+        float newSpeed = Mathf.Lerp(
+            villager.entityStats.speed.GetMaxSpeed(),
+            villager.entityStats.speed.GetMinSpeed(),
+            tirednessRatio
+        );
+
+        villager.entityStats.speed.SetCurrentSpeed(newSpeed);
     }
     #endregion
 }

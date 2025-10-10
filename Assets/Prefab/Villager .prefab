@@ -191,9 +191,10 @@ GameObject:
   - component: {fileID: 2788107372729411508}
   - component: {fileID: 3651304797253572037}
   - component: {fileID: 3285886991959601683}
-  - component: {fileID: 8065378118851276089}
   - component: {fileID: 5573085817720345216}
+  - component: {fileID: 8065378118851276089}
   - component: {fileID: 1388660094517299915}
+  - component: {fileID: 3474459678904037202}
   m_Layer: 0
   m_Name: 'Villager '
   m_TagString: Untagged
@@ -289,6 +290,26 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &5573085817720345216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4984405645907764698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 1
+  m_AffectedAgents: ffffffff
 --- !u!114 &8065378118851276089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,27 +343,13 @@ MonoBehaviour:
   currentCityTask: 0
   currentPersonalTask: 0
   interruptedTasks: 0
-  takeOtherOrderTime: 0
---- !u!114 &5573085817720345216
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4984405645907764698}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SerializedVersion: 0
-  m_OverrideArea: 0
-  m_Area: 0
-  m_OverrideGenerateLinks: 0
-  m_GenerateLinks: 0
-  m_IgnoreFromBuild: 1
-  m_ApplyToChildren: 1
-  m_AffectedAgents: ffffffff
+  wanderRadius: 15
+  interactionDistance: 2
+  minPauseTime: 0
+  maxPauseTime: 0
+  lastReproductionTime: 0
+  reproductionCooldown: 0
+  isReproducing: 0
 --- !u!114 &1388660094517299915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,5 +362,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f50f3f3cf4975459b5639e244e622c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpdateStatsComponent
-  eatingTime: 2.5
-  SpeepingTime: 10
+  eatingDuration: 5
+  sleepingDuration: 10
+--- !u!114 &3474459678904037202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4984405645907764698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fb32875fbab04044a481f8d482ae9a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VillagerRessourceManager
+  maxRessourceQuantity: 15

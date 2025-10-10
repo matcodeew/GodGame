@@ -14,6 +14,14 @@ namespace GodGame
         public readonly List<RessourceWoods> AllTree = new();
         public readonly List<RessourceFoodBush> AllFoodBush = new();
 
+        [Header("Spawn Prefab")]
+        [SerializeField] private GameObject VillagerPrefab;
+        [SerializeField] private GameObject TreePrefab;
+        [SerializeField] private GameObject RockPrefab;
+        [SerializeField] private GameObject FoodBushPrefab;
+        [SerializeField] private GameObject BushPrefab;
+        private GameObject PrefabToInstantiate;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -63,5 +71,45 @@ namespace GodGame
                     break;
             }
         }
+
+
+
+        public void SpawnVillager()
+        {
+            PrefabToInstantiate = VillagerPrefab;
+        }
+        public void SpawnTree()
+        {
+            PrefabToInstantiate = TreePrefab;
+        }
+        public void SpawnRock()
+        {
+            PrefabToInstantiate = RockPrefab;
+        }
+        public void SpawnFoodBush()
+        {
+            PrefabToInstantiate = FoodBushPrefab;
+        }
+        public void SpawnBush()
+        {
+            PrefabToInstantiate = BushPrefab;
+        }
+
+
+        public void CreateRayCast()
+        {
+            if (Physics.Raycast(Input.mousePosition, Vector3.forward, Mathf.Infinity))
+            {
+
+            }
+        }
+
+
+
+
+
+
+
+
     }
 }

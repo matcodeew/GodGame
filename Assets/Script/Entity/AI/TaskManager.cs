@@ -6,7 +6,7 @@ public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance { get; private set; }
 
-    [SerializeField] private readonly List<TaskRequest> taskQueue = new();
+    [SerializeField] private List<TaskRequest> taskQueue = new();
 
     private void Awake()
     {

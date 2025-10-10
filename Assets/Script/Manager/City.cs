@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Resources;
 using UnityEngine;
 
 [System.Serializable]
@@ -24,11 +26,12 @@ public class City : MonoBehaviour
 
     public CityStatsComponents cityStats;
 
-    public List<Villager> villagersMakingBaby = new List<Villager>();
+    [Header("Reproduction Settings")]
+    public float reproductionCooldown = 120f;
+    private float lastBirthTime = -9999f;
+    //public Transform babySpawnPoint;
+    [SerializeField, Range(0,1)] private float bordRessourceRatio;
 
-    [Header("Born Param")]
-    [SerializeField, Range(0, 1)] private float RessourceRatioNeeded;
-    public float BornTime = 10.0f;
 
     [Header("DEBUG")]
     [SerializeField] private Villager villagerPrefab;
@@ -95,6 +98,7 @@ public class City : MonoBehaviour
     private void Update()
     {
         CheckOrder();
+       // TryMakeBaby();
     }
 
 
@@ -128,26 +132,11 @@ public class City : MonoBehaviour
             default: return;
         }
     }
-
-
     private void CheckOrder()
     {
-        if (CanHaveReproduceTask())
-        {
-            TaskManager.Instance.AddTask(TaskType.MakeBaby, 5);
-        }
         PostResourceTask(cityStats.currentFoods, cityStats.maxFoods, TaskType.GatherFood);
         PostResourceTask(cityStats.currentWoods, cityStats.maxWoods, TaskType.GatherWood);
         PostResourceTask(cityStats.currentFaith, cityStats.maxFaith, TaskType.Pray);
-    }
-
-    private bool CanHaveReproduceTask()
-    {
-        bool haveEnoughFoods = cityStats.currentFoods / cityStats.maxFoods >= RessourceRatioNeeded;
-        bool haveEnoughWoods = cityStats.currentWoods / cityStats.maxWoods >= RessourceRatioNeeded;
-
-        // bool hasEnoughSpace = city.CurrentPopulation < city.MaxPopulation;
-        return haveEnoughFoods && haveEnoughWoods;
     }
 
     public void SpawnNewVillager(Villager parentA, Villager parentB)
@@ -159,4 +148,57 @@ public class City : MonoBehaviour
         newVillager.Initialize(this);
         AddCitizen(newVillager);
     }
+
+
+
+    //private void TryMakeBaby()
+    //{
+    //    print($"time {Time.time}, CD = {lastBirthTime + reproductionCooldown}");
+    //    if (Time.time < lastBirthTime + reproductionCooldown) return;
+    //    if (!HasEnoughResources()) return;
+
+    //    List<Villager> freeVillagers = AllCitizen.FindAll(v => v.IsAvailableForTask());
+    //    if (freeVillagers.Count < 2) return;
+
+    //    Villager parentA = freeVillagers[0];
+    //    Villager parentB = freeVillagers[1];
+
+
+    //    //make house position
+    //   // Vector3 meetingPoint = babySpawnPoint.position;
+    //    Vector3 meetingPoint = Vector3.zero;
+
+
+    //    parentA.AssignMakeBabyTask(meetingPoint);
+    //    parentB.AssignMakeBabyTask(meetingPoint);
+
+    //    StartCoroutine(MakeBabyCoroutine(parentA, parentB, meetingPoint));
+    //}
+
+    //private IEnumerator MakeBabyCoroutine(Villager a, Villager b, Vector3 point)
+    //{
+    //    while (!a.IsAtDestination(point) || !b.IsAtDestination(point))
+    //    {
+    //        yield return null;
+    //    }
+    //    a.agent.isStopped = true;
+    //    b.agent.isStopped = true;
+
+
+    //    GameObject newVillager = Instantiate(villagerPrefab, point, Quaternion.identity).gameObject;
+    //    Villager baby = newVillager.GetComponent<Villager>();
+    //    baby.Initialize(this);
+    //    AllCitizen.Add(baby);
+
+    //    lastBirthTime = Time.time;
+    //    a.OnChildBorn();
+    //    b.OnChildBorn();
+    //}
+
+    //private bool HasEnoughResources()
+    //{
+    //    return (float)cityStats.currentFoods / (float)cityStats.maxFoods >= bordRessourceRatio && (float)cityStats.currentWoods / (float)cityStats.maxWoods >= bordRessourceRatio;
+    //}
+
+
 }

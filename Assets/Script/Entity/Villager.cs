@@ -21,9 +21,6 @@ public class Villager : Entity
     [SerializeField] private float minPauseTime = 0.0f;
     [SerializeField] private float maxPauseTime;
 
-    [Header("Born Setting")]
-    [SerializeField] private float lastReproductionTime;
-    [SerializeField, Range(30, 180)] private float reproductionCooldown;
 
 
     [Header("COMPONENTS")]
@@ -47,6 +44,7 @@ public class Villager : Entity
 
         return true;
     }
+
 
     private void Update()
     {
@@ -82,7 +80,7 @@ public class Villager : Entity
     // --- IDLE ---
     private void HandleIdle()
     {
-        if (currentCityTask == TaskType.NONE)
+        if (currentCityTask == TaskType.NONE && currentPersonalTask != TaskType.MakeBaby)
         {
             WanderRandomly();
         }
@@ -140,16 +138,6 @@ public class Villager : Entity
 
     private IEnumerator InteractionRoutine()
     {
-        //string actionText = currentCityTask switch
-        //{
-        //    TaskType.GatherWood => "Chopping wood...",
-        //    TaskType.GatherFood => "Collecting food...",
-        //    TaskType.Pray => "Praying...",
-        //    _ => "ERROR",
-        //};
-
-        //Debug.Log($"{entityStats.GetEntityName()} — {actionText}");
-
         if (currentTarget.TryGetComponent(out InteractibleStructure structure))
         {
             structure.Interact(this);
@@ -194,18 +182,14 @@ public class Villager : Entity
     {
         if (currentCityTask == TaskType.NONE && currentPersonalTask == TaskType.NONE && TaskManager.Instance?.HasTasks == true)
         {
-            TaskType taskType = TaskManager.Instance.GetNextTask().taskType;
-            if (taskType == TaskType.MakeBaby)
+            if (currentPersonalTask != TaskType.MakeBaby && currentPersonalTask != TaskType.MakeBaby)
             {
-                currentPersonalTask = taskType;
-            }
-            else
-            {
+                TaskType taskType = TaskManager.Instance.GetNextTask().taskType;
                 currentCityTask = taskType;
             }
-            currentState = VillagerState.MovingToTask;
         }
     }
+
 
     // --- TARGET SELECTION ---
     private GameObject FindClosestTarget(TaskType type)
@@ -221,7 +205,6 @@ public class Villager : Entity
         if (ressources == null || ressources.Count == 0) return null;
 
 
-        //////////////////////////////////// //////////////////////////////////// Optional
         InteractibleStructure closest = null;
         float minDist = float.MaxValue;
 
@@ -235,7 +218,8 @@ public class Villager : Entity
                 closest = res;
             }
         }
-        //////////////////////////////////////////////////////////////////////////
+
+        RessourceLocator.UnBind(closest, closest.type);
         return closest?.gameObject;
     }
 
@@ -253,31 +237,32 @@ public class Villager : Entity
         StartCoroutine(PauseAfterTask(1f));
     }
 
+    //// ---- MakeBaby -------
 
-    //----ReproductionTask-------
+    //public void AssignMakeBabyTask(Vector3 meetingPoint)
+    //{
+    //    currentPersonalTask = TaskType.MakeBaby;
+    //    currentCityTask = TaskType.MakeBaby;
+    //    currentState = VillagerState.MovingToTask;
+    //    agent.SetDestination(meetingPoint);
+    //}
 
-    public bool CanReproduceTimer()
-    {
-        return Time.time - lastReproductionTime > reproductionCooldown;
-    }
+    //public bool IsAvailableForTask()
+    //{
+    //    return currentCityTask == TaskType.NONE;
+    //}
 
-    private IEnumerator MakeBaby(Villager partner)
-    {
-        currentCityTask = TaskType.MakeBaby;
-        agent.isStopped = false;
-        agent.SetDestination(partner.transform.position);
+    //public bool IsAtDestination(Vector3 point)
+    //{
+    //    return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 1.2f;
+    //}
 
-        while (Vector3.Distance(transform.position, partner.transform.position) > 1.5f)
-            yield return null;
+    //public void OnChildBorn()
+    //{
+    //    currentPersonalTask = TaskType.NONE;
+    //    currentCityTask = TaskType.NONE;
+    //    currentState = VillagerState.Idle;
+    //    agent.isStopped = false;
+    //}
 
-        agent.isStopped = true;
-        yield return new WaitForSeconds(Random.Range(3f, 6f));
-
-        city.SpawnNewVillager(this, partner);
-
-        lastReproductionTime = Time.time;
-        partner.lastReproductionTime = Time.time;
-
-        currentCityTask = TaskType.NONE;
-    }
 }
