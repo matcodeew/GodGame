@@ -1,7 +1,10 @@
 public enum EventType
 {
     NONE,
-    UPDATE_UINbsCitizen,
+    UPDATE_UI_NbsCitizen,
+    UPDATE_UI_FoodText,
+    UPDATE_UI_WoodText,
+    UPDATE_UI_FaithFill,
     DestroyInteractibleStruct,
     NewTaskCreated,
     VillagerTakeRessource,

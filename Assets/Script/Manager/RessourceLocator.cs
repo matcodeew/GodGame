@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Unity;
-using UnityEngine;
 
 public static class RessourceLocator
 {
@@ -27,7 +25,6 @@ public static class RessourceLocator
 
         if (!ressources[type].Contains(structure))
             ressources[type].Add(structure);
-        Debug.Log($"{type} : {ressources[type].Count}");
     }
 
     public static void UnBind(InteractibleStructure structure, RessourceType type)

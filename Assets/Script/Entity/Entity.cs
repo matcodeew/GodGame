@@ -10,7 +10,7 @@ public class Entity : MonoBehaviour
     {
         //Initialize();
     }
-    public virtual bool Initialize(City city)
+    public virtual bool Initialize()
     {
         if (TryGetComponent<NavMeshAgent>(out NavMeshAgent NavAgent))
         {
@@ -19,8 +19,10 @@ public class Entity : MonoBehaviour
         print($"Initialize {entityStats.GetEntityName()} ");
         return true;
     }
-    public void GoTo(Vector3 target)
+    public void GoTo(Vector2 target)
     {
-        agent.SetDestination(target);
+        agent.isStopped = false;
+        Vector3 pos = new Vector3(target.x, transform.position.y, target.y);
+        agent.SetDestination(pos);
     }
 }

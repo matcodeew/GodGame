@@ -1,6 +1,5 @@
-using System.Collections;
+using GodGame;
 using System.Collections.Generic;
-using System.Resources;
 using UnityEngine;
 
 [System.Serializable]
@@ -16,25 +15,30 @@ public struct CityStatsComponents
 
     public int currentFaith;
     public int maxFaith;
+
+    public int maxPopulation;
+    public int currentCityzen;
 }
+
+
+[RequireComponent(typeof(HouseBuilderManager))]
 
 public class City : MonoBehaviour
 {
     public string civilizationName = string.Empty;
 
     public List<Villager> AllCitizen = new();
+    public List<House> houses = new();
 
     public CityStatsComponents cityStats;
 
-    [Header("Reproduction Settings")]
-    public float reproductionCooldown = 120f;
-    private float lastBirthTime = -9999f;
-    //public Transform babySpawnPoint;
-    [SerializeField, Range(0,1)] private float bordRessourceRatio;
+    //[Header("Reproduction Settings")]
+    //public float reproductionCooldown = 120f;
+    //private float lastBirthTime = -9999f;
 
+    public HouseBuilderManager builderManager;
 
-    [Header("DEBUG")]
-    [SerializeField] private Villager villagerPrefab;
+    [SerializeField, Range(0, 1)] private float bordRessourceRatio;
 
 
     City(string civilizationName, CityStatsComponents cityStats)
@@ -45,7 +49,16 @@ public class City : MonoBehaviour
 
     private void Awake()
     {
+        builderManager = GetComponent<HouseBuilderManager>();
+
         Initialize();
+
+    }
+
+    private void Start()
+    {
+        UpdateNbsCitizen();
+        UpdateRessourceUI();
     }
 
     private void OnEnable()
@@ -66,15 +79,8 @@ public class City : MonoBehaviour
         cityStats.currentWoods = 50;
         cityStats.maxWoods = 100;
         cityStats.currentFaith = 0;
-    }
-
-    [ContextMenu("TEST_SpawnVillager")]
-
-    public void TEST_SpawnVillager()
-    {
-        Villager newVillager = Instantiate(villagerPrefab);
-        newVillager.Initialize(this);
-        AddCitizen(newVillager);
+        cityStats.maxPopulation = 0;
+        cityStats.currentCityzen = 0;
     }
 
     public void AddCitizen(Villager villager)
@@ -84,6 +90,7 @@ public class City : MonoBehaviour
 
         AllCitizen.Add(villager);
         UpdateNbsCitizen();
+        cityStats.currentCityzen++;
     }
 
     public void RemoveCitizen(Villager villager)
@@ -98,7 +105,7 @@ public class City : MonoBehaviour
     private void Update()
     {
         CheckOrder();
-       // TryMakeBaby();
+        // TryMakeBaby();
     }
 
 
@@ -120,7 +127,13 @@ public class City : MonoBehaviour
     private void UpdateNbsCitizen()
     {
         cityStats.nbsVillagers = AllCitizen.Count;
-        EventBus.Publish(EventType.UPDATE_UINbsCitizen, cityStats.nbsVillagers);
+        EventBus.Publish(EventType.UPDATE_UI_NbsCitizen, cityStats.nbsVillagers);
+    }
+
+    private void UpdateRessourceUI()
+    {
+        EventBus.Publish(EventType.UPDATE_UI_FoodText, cityStats.currentFoods);
+        EventBus.Publish(EventType.UPDATE_UI_WoodText, cityStats.currentWoods);
     }
 
     public void UpdateCityRessource(RessourceType type)
@@ -129,8 +142,11 @@ public class City : MonoBehaviour
         {
             case (RessourceType.Food): cityStats.currentFoods++; break;
             case (RessourceType.Wood): cityStats.currentWoods++; break;
-            default: return;
+            default:
+                return;
+
         }
+        UpdateRessourceUI();
     }
     private void CheckOrder()
     {
@@ -144,12 +160,11 @@ public class City : MonoBehaviour
         Vector3 spawnPos = (parentA.transform.position + parentB.transform.position) / 2f + Random.insideUnitSphere * 2f;
         spawnPos.y = 0;
 
-        Villager newVillager = Instantiate(villagerPrefab, spawnPos, Quaternion.identity);
-        newVillager.Initialize(this);
+        Villager newVillager = Instantiate(GameManager.Instance.Villager.prefab, spawnPos, Quaternion.identity, GameManager.Instance.Villager.parent).GetComponent<Villager>();
+        newVillager.Initialize();
         AddCitizen(newVillager);
+        cityStats.currentCityzen++;
     }
-
-
 
     //private void TryMakeBaby()
     //{

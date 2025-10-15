@@ -13,7 +13,7 @@ public class InteractibleStructure : MonoBehaviour
 
     private void SetWorldPos()
     {
-        buildingWorldPos = transform.position;
+        buildingWorldPos = new Vector2(transform.position.x, transform.position.z);
     }
     private void Awake()
     {

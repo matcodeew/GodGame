@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Villager))]
 public class UpdateStatsComponent : MonoBehaviour
 {
     private Villager villager;
 
-    [SerializeField] private float eatingTime;
-    [SerializeField] private float SpeepingTime;
+    [Header("TIMERS")]
+    [SerializeField] private float eatingTime = 5f;
+    [SerializeField] private float sleepingTime = 10f;
 
     private void Awake()
     {
@@ -19,85 +21,80 @@ public class UpdateStatsComponent : MonoBehaviour
         UpdateTirednessValue();
     }
 
-    #region UpdateStats
-    private void UpdateTaskByAnger()
+    #region Fullness (Hunger)
+    private void UpdateFullnessValue()
     {
-        if (villager.entityStats.hanger.GetCurrentFullness() >= villager.entityStats.hanger.GetMaxFullness() / 2 && villager.currentCityTask == TaskType.NONE)
-        {
-            villager.currentPersonalTask = TaskType.Eat;
+        if (villager.currentPersonalTask == TaskType.Eat || villager.currentPersonalTask == TaskType.Sleep)
+            return;
 
-            //Take Food //civilisation.SetFood(-1);
-            //GoTo(FoodStorage.location);
-
-
-            villager.entityStats.hanger.SetCurrentFullness(0);
-
-
-            TimerManager.StartTimer(eatingTime, new Action(() => villager.currentPersonalTask = TaskType.NONE));
-        }
-        else if (villager.entityStats.hanger.GetCurrentFullness() >=
-                villager.entityStats.hanger.GetMaxFullness() - villager.entityStats.hanger.GetMaxFullness() / 4 && villager.currentCityTask != TaskType.NONE)
-        {
-            villager.interruptedTasks = villager.currentCityTask;
-            villager.currentCityTask = TaskType.NONE;
-            villager.currentPersonalTask = TaskType.Eat;
-
-            //Stop currentTask
-            //Take Food //civilisation.SetFood(-1);
-            //GoTo(FoodStorage.location);
-
-            villager.entityStats.hanger.SetCurrentFullness(0);
-
-            TimerManager.StartTimer(eatingTime, new Action(() =>
-            {
-                villager.currentCityTask = villager.interruptedTasks;
-                villager.interruptedTasks = TaskType.NONE;
-            }));
-        }
-    }
-    public void UpdateFullnessValue()
-    {
-        if (villager.currentPersonalTask == TaskType.Eat || villager.currentPersonalTask == TaskType.Sleep) return;
-
-        if (villager.entityStats.hanger.IsAnger())
-        {
-            print($"Entity {villager.entityStats.GetEntityName()}, is Anger");
-            villager.entityStats.hanger.SetCurrentFullness(0);
-        }
         villager.entityStats.hanger.SetCurrentFullness(
-            Time.deltaTime * villager.entityStats.hanger.GetFullnessTimeRate() + villager.entityStats.hanger.GetCurrentFullness() * 1/*GameManager.tickSpeed*/);
+            villager.entityStats.hanger.GetCurrentFullness() +
+            Time.deltaTime * villager.entityStats.hanger.GetFullnessTimeRate()
+        );
 
-        UpdateTaskByAnger();
-    }
-
-    public void UpdateTirednessValue()
-    {
-        if (villager.currentPersonalTask != TaskType.Sleep)
+        if (villager.entityStats.hanger.GetCurrentFullness() >= villager.entityStats.hanger.GetMaxFullness() / 2f)
         {
-            villager.entityStats.tiredness.SetCurrentTiredness(
-          Time.deltaTime * villager.entityStats.tiredness.GetTirednessTimeRate() + villager.entityStats.tiredness.GetCurrentTiredness() * 1/*GameManager.tickSpeed*/);
-
-            if (villager.entityStats.tiredness.IsTired())
-            {
-                villager.interruptedTasks = villager.currentCityTask;
-                villager.currentCityTask = TaskType.NONE;
-                villager.currentPersonalTask = TaskType.Sleep;
-
-                TimerManager.StartTimer(SpeepingTime /*GameManager.DayTotalTime*/, new Action(() =>
-                {
-                    villager.entityStats.tiredness.SetCurrentTiredness(0);
-                    villager.currentPersonalTask = TaskType.NONE;
-                }));
-            }
-            UpdateSpeedWithTiredness();
+            villager.currentPersonalTask = TaskType.Eat;
+            HandleEating();
         }
     }
 
+    private void HandleEating()
+    {
+        if (villager.AssignedCity == null) return;
+
+        villager.AssignedCity.cityStats.currentFoods = Mathf.Max(0, villager.AssignedCity.cityStats.currentFoods - 5);
+
+        villager.GoHomeToEat(eatingTime);
+    }
+    #endregion
+
+    #region Tiredness (Sleep)
+    private void UpdateTirednessValue()
+    {
+        if (villager.currentPersonalTask == TaskType.Sleep)
+            return;
+
+        villager.entityStats.tiredness.SetCurrentTiredness(
+            villager.entityStats.tiredness.GetCurrentTiredness() +
+            Time.deltaTime * villager.entityStats.tiredness.GetTirednessTimeRate()
+        );
+
+        if (villager.entityStats.tiredness.IsTired())
+        {
+            HandleSleeping();
+        }
+
+        UpdateSpeedWithTiredness();
+    }
+
+    private void HandleSleeping()
+    {
+        if (villager.AssignedHouse == null) return;
+
+        villager.interruptedTasks = villager.currentCityTask;
+        villager.currentCityTask = TaskType.NONE;
+        villager.currentPersonalTask = TaskType.Sleep;
+
+        villager.GoTo(new Vector2(
+            villager.AssignedHouse.transform.position.x,
+            villager.AssignedHouse.transform.position.z
+        ));
+
+        TimerManager.StartTimer(sleepingTime, new Action(() =>
+        {
+            villager.entityStats.tiredness.SetCurrentTiredness(0);
+            villager.currentPersonalTask = TaskType.NONE;
+            villager.ResumePreviousTask();
+        }));
+    }
+    #endregion
+
+    #region Speed Adjustment
     private void UpdateSpeedWithTiredness()
     {
         float currentTired = villager.entityStats.tiredness.GetCurrentTiredness();
         float maxTired = villager.entityStats.tiredness.GetMaxTiredness();
-
         float tirednessRatio = Mathf.Clamp01(currentTired / maxTired);
 
         float newSpeed = Mathf.Lerp(

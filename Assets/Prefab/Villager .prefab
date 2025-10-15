@@ -116,7 +116,7 @@ Transform:
   m_GameObject: {fileID: 4210035331269260073}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -267,7 +267,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2.7
   m_Direction: 1
-  m_Center: {x: 0, y: 0.25, z: 0}
+  m_Center: {x: 0, y: 1.25, z: 0}
 --- !u!195 &3285886991959601683
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -346,10 +346,8 @@ MonoBehaviour:
   wanderRadius: 15
   interactionDistance: 2
   minPauseTime: 0
-  maxPauseTime: 0
-  lastReproductionTime: 0
-  reproductionCooldown: 0
-  isReproducing: 0
+  maxPauseTime: 5
+  currentTarget: {fileID: 0}
 --- !u!114 &1388660094517299915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -362,8 +360,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f50f3f3cf4975459b5639e244e622c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpdateStatsComponent
-  eatingDuration: 5
-  sleepingDuration: 10
+  eatingTime: 0
+  sleepingTime: 10
 --- !u!114 &3474459678904037202
 MonoBehaviour:
   m_ObjectHideFlags: 0

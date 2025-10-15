@@ -1,8 +1,18 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace GodGame
 {
+
+    [System.Serializable]
+    public struct SpawnablePrefab
+    {
+        public GameObject prefab;
+        public Transform parent;
+    }
+
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -11,16 +21,32 @@ namespace GodGame
         public float TaskMaxTime = 15f;
 
         [Header("Ressource Lists")]
-        public readonly List<RessourceWoods> AllTree = new();
-        public readonly List<RessourceFoodBush> AllFoodBush = new();
+        public List<RessourceWoods> AllTree = new();
+        public List<RessourceFoodBush> AllFoodBush = new();
+
+        [Header(" City Building List")]
+        public Dictionary<Vector3, City> cities = new();
 
         [Header("Spawn Prefab")]
-        [SerializeField] private GameObject VillagerPrefab;
-        [SerializeField] private GameObject TreePrefab;
-        [SerializeField] private GameObject RockPrefab;
-        [SerializeField] private GameObject FoodBushPrefab;
-        [SerializeField] private GameObject BushPrefab;
+
+        [SerializeField] public SpawnablePrefab Villager;
+
+        [SerializeField] private SpawnablePrefab City;
+        [SerializeField] public SpawnablePrefab House;
+
+        [SerializeField] private SpawnablePrefab Tree;
+        [SerializeField] private SpawnablePrefab FoodBush;
+        [SerializeField] private SpawnablePrefab Bush;
+        [SerializeField] private SpawnablePrefab Rock;
+
+        [SerializeField] private LayerMask placementLayers;
+
+
+        [SerializeField] public NavMeshSurface navMesh;
+
         private GameObject PrefabToInstantiate;
+        private Transform prefabParent;
+        private bool isPlacingBuilding = false;
 
         private void Awake()
         {
@@ -39,6 +65,42 @@ namespace GodGame
         private void OnDisable()
         {
             EventBus.Unsubscribe<InteractibleStructure>(EventType.DestroyInteractibleStruct, RemoveRessourceSpot);
+        }
+
+
+        public Dictionary<Vector3, City> GetAllCity() => cities;
+
+        public City GetNearestCity(Vector3 position, float maxDistance = 50f)
+        {
+            City nearest = null;
+            float minDist = Mathf.Infinity;
+
+            foreach (var kvp in cities)
+            {
+                float dist = Vector3.Distance(position, kvp.Key);
+                if (dist < minDist && dist <= maxDistance)
+                {
+                    minDist = dist;
+                    nearest = kvp.Value;
+                }
+            }
+
+            return nearest;
+        }
+
+        public City CreateNewCity(Vector3 position)
+        {
+            if (cities.ContainsKey(position))
+                return cities[position];
+
+            if (Instantiate(City.prefab, position, Quaternion.identity).TryGetComponent(out City city))
+            {
+                cities.Add(position, city);
+                navMesh.BuildNavMesh();
+                return city;
+            }
+
+            return null;
         }
 
         private void RegisterAllRessourcesInScene()
@@ -72,44 +134,66 @@ namespace GodGame
             }
         }
 
+        // ==== CHOIX DU PREFAB À PLACER ====
+        public void SpawnVillager() => SetPrefab(Villager.prefab, Villager.parent);
+        public void SpawnTree() => SetPrefab(Tree.prefab, Tree.parent);
+        public void SpawnRock() => SetPrefab(Rock.prefab, Rock.parent);
+        public void SpawnFoodBush() => SetPrefab(FoodBush.prefab, FoodBush.parent);
+        public void SpawnBush() => SetPrefab(Bush.prefab, Bush.parent);
 
-
-        public void SpawnVillager()
+        private void SetPrefab(GameObject prefab, Transform parent)
         {
-            PrefabToInstantiate = VillagerPrefab;
-        }
-        public void SpawnTree()
-        {
-            PrefabToInstantiate = TreePrefab;
-        }
-        public void SpawnRock()
-        {
-            PrefabToInstantiate = RockPrefab;
-        }
-        public void SpawnFoodBush()
-        {
-            PrefabToInstantiate = FoodBushPrefab;
-        }
-        public void SpawnBush()
-        {
-            PrefabToInstantiate = BushPrefab;
+            PrefabToInstantiate = prefab;
+            prefabParent = parent;
+            isPlacingBuilding = true;
         }
 
-
-        public void CreateRayCast()
+        private void Update()
         {
-            if (Physics.Raycast(Input.mousePosition, Vector3.forward, Mathf.Infinity))
+            if (!isPlacingBuilding) return;
+
+            if (Input.GetMouseButtonDown(0))
+                TryPlaceBuilding();
+            else if (Input.GetMouseButtonDown(1))
+                CancelPlacement();
+        }
+
+        private void TryPlaceBuilding()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, placementLayers))
             {
+                GameObject newObject = Instantiate(PrefabToInstantiate,
+                    hit.point + new Vector3(0, PrefabToInstantiate.transform.localScale.y / 2, 0), Quaternion.identity, prefabParent);
 
+                if (newObject != null)
+                {
+                    if (newObject.TryGetComponent(out Villager villager))
+                    {
+                        villager.Initialize();
+                    }
+                    else if (newObject.TryGetComponent(out InteractibleStructure ressource))
+                    {
+                        if (ressource is RessourceWoods woods)
+                        {
+                            AllTree.Add(woods);
+                        }
+                        else if(ressource is RessourceFoodBush foodBush)
+                        {
+                            AllFoodBush.Add(foodBush);
+                        }
+                    }
+                }
             }
+            isPlacingBuilding = false;
+            PrefabToInstantiate = null;
         }
+        
 
-
-
-
-
-
-
-
+        private void CancelPlacement()
+        {
+            isPlacingBuilding = false;
+            PrefabToInstantiate = null;
+        }
     }
 }

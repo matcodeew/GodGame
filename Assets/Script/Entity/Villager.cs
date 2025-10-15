@@ -1,3 +1,4 @@
+using GodGame;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,43 +13,116 @@ public class Villager : Entity
     [HideInInspector] public TaskType interruptedTasks = TaskType.NONE;
 
     //[Header("INTERNAL STATES")]
-    private enum VillagerState { Idle, MovingToTask, Interacting, Pausing }
+    [SerializeField] private enum VillagerState { Idle, MovingToTask, Interacting, Pausing }
     private VillagerState currentState = VillagerState.Idle;
 
     [Header("SETTINGS")]
     [SerializeField] private float wanderRadius = 15f;
     [SerializeField] private float interactionDistance = 2f;
-    [SerializeField] private float minPauseTime = 0.0f;
+    [SerializeField, Min(0)] private float minPauseTime;
     [SerializeField] private float maxPauseTime;
-
-
 
     [Header("COMPONENTS")]
     private VillagerRessourceManager ressourceManager;
-    private City city;
+    public City AssignedCity { get; private set; }
+    public House AssignedHouse { get; private set; }
+
 
     [Header("DATA")]
-    private GameObject currentTarget;
+    public GameObject currentTarget;
     private Coroutine interactionRoutine;
 
     // --- INITIALIZATION ---
-    public override bool Initialize(City city)
+    public override bool Initialize()
     {
-        base.Initialize(city);
+        base.Initialize();
 
         agent = GetComponent<NavMeshAgent>();
         ressourceManager = GetComponent<VillagerRessourceManager>();
-        this.city = city;
 
         agent.speed = entityStats.speed.GetCurrentSpeed();
+        FindOrCreateNewCity();
 
         return true;
     }
 
 
+    private void FindOrCreateNewCity()
+    {
+        var gm = GameManager.Instance;
+
+        City nearestCity = gm.GetNearestCity(transform.position, 50f);
+
+        if (nearestCity != null)
+        {
+            AssignedCity = nearestCity;
+            nearestCity.AddCitizen(this);
+            if (nearestCity.houses != null && nearestCity.houses.Count > 0)
+            {
+                AssignHouseOrCreateNewOne();
+            }
+
+        }
+        else
+        {
+            Vector3 newCityPos = transform.position;
+            AssignedCity = gm.CreateNewCity(newCityPos);
+            AssignedCity.AddCitizen(this);
+        }
+    }
+
+
+    private void AssignHouseOrCreateNewOne()
+    {
+        if (AssignedCity == null)
+        {
+            return;
+        }
+
+        if (AssignedCity.houses == null || AssignedCity.houses.Count == 0)
+        {
+            CreateNewHouse();
+            return;
+        }
+
+        foreach (House house in AssignedCity.houses)
+        {
+            if (house == null) continue;
+
+            if (house.occupants.Count < house.maxVillagerOnHouse)
+            {
+                house.AddVillagerIntoHouse(this);
+                AssignedHouse = house;
+                return; 
+            }
+        }
+        CreateNewHouse();
+    }
+
+    private void CreateNewHouse()
+    {
+        AssignedCity.builderManager.TryBuildHouse();
+    }
+
+
+    public void AssignCity(City c)
+    {
+        AssignedCity = c;
+    }
+
+    public void AssignHouse(House h)
+    {
+        AssignedHouse = h;
+    }
+
+
+
     private void Update()
     {
-        HandleTaskAssignment();
+        if (AssignedCity != null)
+        {
+            HandleTaskAssignment();
+        }
         UpdateState();
     }
 
@@ -68,11 +142,9 @@ public class Villager : Entity
                 break;
 
             case VillagerState.Interacting:
-                // Interaction gérée par coroutine
                 break;
 
             case VillagerState.Pausing:
-                // Pause après tâche — rien ici, coroutine gère
                 break;
         }
     }
@@ -97,7 +169,8 @@ public class Villager : Entity
             Vector3 randomDir = Random.insideUnitSphere * wanderRadius + transform.position;
             if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
-                agent.SetDestination(hit.position);
+                GoTo(new Vector2(hit.position.x, hit.position.z));
+                print("go To randomPosition");
             }
         }
     }
@@ -105,6 +178,9 @@ public class Villager : Entity
     // --- MOVEMENT ---
     private void HandleMovement()
     {
+       if (agent.isStopped)
+           agent.isStopped = false;    
+
         if (currentTarget == null)
         {
             currentTarget = FindClosestTarget(currentCityTask);
@@ -115,7 +191,8 @@ public class Villager : Entity
                 currentState = VillagerState.Idle;
                 return;
             }
-            agent.SetDestination(currentTarget.transform.position);
+            GoTo(new Vector2(currentTarget.transform.position.x, currentTarget.transform.position.z));
+            print("Go to task position");
         }
 
         float dist = Vector3.Distance(transform.position, currentTarget.transform.position);
@@ -157,7 +234,8 @@ public class Villager : Entity
         pauseDestination.y = transform.position.y;
 
         agent.isStopped = false;
-        agent.SetDestination(pauseDestination);
+        GoTo(new Vector2(pauseDestination.x, pauseDestination.z));
+        print("GoTo pause Destination");
 
         while (Vector3.Distance(transform.position, pauseDestination) > 0.2f)
             yield return null;
@@ -211,7 +289,10 @@ public class Villager : Entity
         foreach (var res in ressources)
         {
             if (res == null) continue;
-            float dist = Vector3.Distance(transform.position, res.transform.position);
+
+            float dist = Vector2.Distance(new Vector2(transform.position.x, transform.position.z),
+                new Vector2(res.transform.position.x, res.transform.position.z));
+
             if (dist < minDist)
             {
                 minDist = dist;
@@ -222,8 +303,6 @@ public class Villager : Entity
         RessourceLocator.UnBind(closest, closest.type);
         return closest?.gameObject;
     }
-
-    // --- API EXTERNE ---
     public void AddRessource(RessourceType type, int quantity)
     {
         ressourceManager.AddRessource(type, quantity);
@@ -234,8 +313,64 @@ public class Villager : Entity
         if (interactionRoutine != null)
             StopCoroutine(interactionRoutine);
 
-        StartCoroutine(PauseAfterTask(1f));
+        StartCoroutine(PauseAfterTask(Random.Range((minPauseTime), maxPauseTime)));
     }
+
+
+
+    public void GoHomeToEat(float eatingTime)
+    {
+        if (AssignedHouse == null) return;
+
+        interruptedTasks = currentCityTask;
+        currentCityTask = TaskType.NONE;
+        currentPersonalTask = TaskType.Eat;
+
+        agent.isStopped = false;
+        GoTo(new Vector2(AssignedHouse.transform.position.x, AssignedHouse.transform.position.z));
+
+        StartCoroutine(EatRoutine(eatingTime));
+    }
+
+    private IEnumerator EatRoutine(float time)
+    {
+        currentState = VillagerState.Interacting;
+        yield return new WaitForSeconds(time);
+
+        currentPersonalTask = TaskType.NONE;
+        entityStats.hanger.SetCurrentFullness(0);
+
+        ResumePreviousTask();
+    }
+
+    public void ResumePreviousTask()
+    {
+        if (interruptedTasks != TaskType.NONE)
+        {
+            currentCityTask = interruptedTasks;
+            interruptedTasks = TaskType.NONE;
+            currentState = VillagerState.MovingToTask;
+            currentPersonalTask = TaskType.NONE;
+            agent.isStopped = false;
+
+            if (currentTarget != null)
+            {
+                GoTo(new Vector2(currentTarget.transform.position.x, currentTarget.transform.position.z));
+            }
+        }
+        else
+        {
+            currentState = VillagerState.Idle;
+        }
+    }
+
+
+
+
+
+
+
+
 
     //// ---- MakeBaby -------
 

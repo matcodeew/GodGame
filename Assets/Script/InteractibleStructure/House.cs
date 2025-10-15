@@ -1,44 +1,51 @@
 using System.Collections.Generic;
+using UnityEngine;
 
-public class House : InteractibleStructure, IBuildable
+namespace GodGame
 {
-    private List<Villager> resident = new();
-    private int maxPlace = 5;
-
-
-
-    public bool AsPlace() => resident.Count > maxPlace;
-    public void AddResident(Villager villager)
+    public class House : MonoBehaviour
     {
-        if (resident.Contains(villager) && AsPlace()) return;
+        public City parentCity;
+        public List<Villager> occupants = new();
+        public int maxVillagerOnHouse = 5;
 
-        resident.Add(villager);
-    }
-
-    public void RemoveResident(Villager villager)
-    {
-        if (!resident.Contains(villager)) return;
-
-        resident.Remove(villager);
-    }
-
-    public override void Interact(Villager villager)
-    {
-        base.Interact(villager);
-        for (int i = 0; i < resident.Count; i++)
+        public void Initialize(City city)
         {
-            print($"resident n.{i} is {resident[i].name}");
+            parentCity = city;
+            AssignVillagers();
         }
-    }
 
-    public void Build()
-    {
-        BuildSfx();
-        throw new System.NotImplementedException();
-    }
+        private void AssignVillagers()
+        {
+            var freeVillagers = GetUnhousedVillagers();
+            if (freeVillagers.Count == 0) return;
 
-    public void BuildSfx()
-    {
-        throw new System.NotImplementedException();
+            int nbToAssign = freeVillagers.Count;
+            for (int i = 0; i < nbToAssign; i++)
+            {
+                var v = freeVillagers[Random.Range(0, freeVillagers.Count)];
+                v.AssignHouse(this);
+                occupants.Add(v);
+                freeVillagers.Remove(v);
+            }
+        }
+
+        public void AddVillagerIntoHouse(Villager villager)
+        {
+            if(occupants.Contains(villager) && occupants.Count >= maxVillagerOnHouse) return;
+
+            occupants.Add(villager);
+        }
+
+        private List<Villager> GetUnhousedVillagers()
+        {
+            List<Villager> free = new();
+            foreach (var v in parentCity.AllCitizen)
+            {
+                if (v.AssignedHouse == null)
+                    free.Add(v);
+            }
+            return free;
+        }
     }
 }
