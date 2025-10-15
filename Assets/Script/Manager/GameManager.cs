@@ -110,7 +110,7 @@ namespace GodGame
             if (Instantiate(City.prefab, position, Quaternion.identity).TryGetComponent(out City city))
             {
                 cities.Add(position, city);
-                navMesh.BuildNavMesh();
+                //navMesh.BuildNavMesh();
                 return city;
             }
 
@@ -175,13 +175,19 @@ namespace GodGame
         private void TryPlaceBuilding()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            print($"try ray");
+
+
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, placementLayers))
             {
+                print($"hit at {hit.point}");
                 GameObject newObject = Instantiate(PrefabToInstantiate,
                     hit.point /*+ new Vector3(0, PrefabToInstantiate.transform.localScale.y / 2, 0)*/, Quaternion.identity, prefabParent);
 
                 if (newObject != null)
                 {
+                    print($"spawn Object");
+
                     if (newObject.TryGetComponent(out Villager villager))
                     {
                         villager.Initialize();

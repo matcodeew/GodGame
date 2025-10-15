@@ -631,7 +631,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpdateStatsComponent
   eatingTime: 0
   sleepingTime: 10
-  LifeTimeSecond: 10
+  LifeTimeSecond: 600
 --- !u!114 &3474459678904037202
 MonoBehaviour:
   m_ObjectHideFlags: 0
