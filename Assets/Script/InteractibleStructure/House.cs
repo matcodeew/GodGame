@@ -29,6 +29,13 @@ namespace GodGame
                 freeVillagers.Remove(v);
             }
         }
+        public void UnAssignVillagers(Villager villager)
+        {
+            if (occupants.Contains(villager))
+            {
+                occupants.Remove(villager);
+            }
+        }
 
         public void AddVillagerIntoHouse(Villager villager)
         {

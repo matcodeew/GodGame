@@ -1,8 +1,20 @@
 using GodGame;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
+
+[System.Serializable]
+public struct OrderImage
+{
+    public Sprite FoodOrderSprite;
+    public Sprite WoodOrderSprite;
+    public Sprite EatOrderSprite;
+    public Sprite SleepOrderSprite;
+    public Sprite ReproduceOrderSprite;
+}
 
 [RequireComponent(typeof(UpdateStatsComponent), typeof(NavMeshAgent), typeof(VillagerRessourceManager))]
 public class Villager : Entity
@@ -32,9 +44,37 @@ public class Villager : Entity
     public GameObject currentTarget;
     private Coroutine interactionRoutine;
 
+    [Header("Order Image Ref")]
+    [SerializeField] private GameObject orderImageContainer;
+    [SerializeField] private float orderImageTime;
+    [SerializeField] private OrderImage orderImage;
+
+    [Header("DeathImage")]
+    [SerializeField] private GameObject DeathImageObject;
+    [SerializeField] private Animator DeathGif;
+
+    private string UpdateOrderImageTimerID;
+    private bool isDead = false;
+
+
+    private bool isFrozen = false;
+    private bool isSick = false;
+
+
+
+    [Header("Villager Skin possible")]
+    [SerializeField] private Image SkinContainer;
+    [SerializeField] private List<Sprite> skins = new();
+    [SerializeField] private Sprite defaultSkin;
+
+    [Header("Movement")]
+    [SerializeField] private Animator VillagerAnimator;
+
+
     // --- INITIALIZATION ---
     public override bool Initialize()
     {
+        SkinContainer.sprite = skins.Count > 0? skins[UnityEngine.Random.Range(0, skins.Count)] : defaultSkin is not null ? defaultSkin : null;
         base.Initialize();
 
         agent = GetComponent<NavMeshAgent>();
@@ -45,6 +85,150 @@ public class Villager : Entity
 
         return true;
     }
+
+
+    private void Update()
+    {
+        if (isDead || isFrozen || isSick) return;
+
+        StartWalkAnimation();
+
+        if (AssignedCity != null)
+        {
+            HandleTaskAssignment();
+        }
+        UpdateState();
+    }
+
+    private void StartWalkAnimation()
+    {
+        if (agent.velocity.sqrMagnitude > 0.1f && isDead == false && isFrozen == false)
+        {
+            VillagerAnimator.SetBool("IsWalking", true);
+        }
+        else
+        {
+            VillagerAnimator.SetBool("IsWalking", false);
+        }
+    }
+
+
+    public void ApplyFreeze(float duration)
+    {
+        if (isDead || isFrozen) return;
+
+        StartCoroutine(FreezeRoutine(duration));
+    }
+
+    private IEnumerator FreezeRoutine(float duration)
+    {
+        isFrozen = true;
+        agent.isStopped = true;
+
+        yield return new WaitForSeconds(duration);
+
+        agent.isStopped = false;
+        isFrozen = false;
+    }
+
+    public void ApplySickness(float duration)
+    {
+        if (isDead || isSick) return;
+
+        StartCoroutine(SicknessRoutine(duration));
+    }
+
+    private IEnumerator SicknessRoutine(float duration)
+    {
+        isSick = true;
+        float elapsed = 0f;
+        float tickInterval = 1f;
+        int iteration = Mathf.FloorToInt(duration / tickInterval);
+        while (elapsed < duration)
+        {
+            entityStats.health.SetCurrentHelth(Mathf.Clamp(entityStats.health.GetCurrentHelth() - entityStats.health.GetMaxHelth() / iteration, 0, entityStats.health.GetMaxHelth()));
+            yield return new WaitForSeconds(tickInterval);
+            elapsed += tickInterval;
+        }
+        if (entityStats.health.GetCurrentHelth() <= 0)
+        {
+            VillagerDeath();
+        }
+        isSick = false;
+    }
+
+
+
+
+
+
+
+
+    public void VillagerDeath()
+    {
+        //----Stop Movement
+        isDead = true;
+
+        if (agent is not null)
+        {
+            agent.isStopped = true;
+        }
+
+        currentCityTask = TaskType.NONE;
+        currentPersonalTask = TaskType.NONE;
+
+
+
+        CancelOrderImage();
+
+        DeathImageObject.SetActive(true);
+
+        TimerManager.StartTimer(2.5f, new Action(() =>
+        {
+            DeathImageObject.SetActive(false);
+            AssignedHouse?.UnAssignVillagers(this);
+            EventBus.Publish<int>(EventType.UPDATE_UI_NbsCitizen, --AssignedCity.cityStats.currentCityzen);
+
+            AssignedCity?.AllCitizen.Remove(this);
+            Destroy(gameObject);
+        }));
+
+
+    }
+
+    public void CancelOrderImage()
+    {
+        orderImageContainer.SetActive(false);
+        TimerManager.CancelTimer(UpdateOrderImageTimerID);
+    }
+
+    public void AssignNewOrderImage()
+    {
+        if (isDead) return;
+
+        orderImageContainer.transform.GetChild(0).GetComponent<Image>().sprite = GetImageByTask();
+        orderImageContainer.SetActive(true);
+
+        UpdateOrderImageTimerID = TimerManager.StartTimer(orderImageTime, new Action(() => orderImageContainer?.SetActive(false)));
+    }
+
+    private Sprite GetImageByTask()
+    {
+        switch (currentCityTask)
+        {
+            case (TaskType.GatherWood): return orderImage.WoodOrderSprite;
+            case (TaskType.GatherFood): return orderImage.FoodOrderSprite;
+            case (TaskType.MakeBaby): return orderImage.ReproduceOrderSprite;
+        }
+        switch (currentPersonalTask)
+        {
+            case (TaskType.Eat): return orderImage.EatOrderSprite;
+            case (TaskType.Sleep): return orderImage.SleepOrderSprite;
+            case (TaskType.MakeBaby): return orderImage.ReproduceOrderSprite;
+        }
+        return null;
+    }
+
 
 
     private void FindOrCreateNewCity()
@@ -93,7 +277,7 @@ public class Villager : Entity
             {
                 house.AddVillagerIntoHouse(this);
                 AssignedHouse = house;
-                return; 
+                return;
             }
         }
         CreateNewHouse();
@@ -117,14 +301,6 @@ public class Villager : Entity
 
 
 
-    private void Update()
-    {
-        if (AssignedCity != null)
-        {
-            HandleTaskAssignment();
-        }
-        UpdateState();
-    }
 
     // --------------------
     // STATE MACHINE
@@ -166,11 +342,10 @@ public class Villager : Entity
     {
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
-            Vector3 randomDir = Random.insideUnitSphere * wanderRadius + transform.position;
+            Vector3 randomDir = UnityEngine.Random.insideUnitSphere * wanderRadius + transform.position;
             if (NavMesh.SamplePosition(randomDir, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
             {
                 GoTo(new Vector2(hit.position.x, hit.position.z));
-                print("go To randomPosition");
             }
         }
     }
@@ -178,8 +353,8 @@ public class Villager : Entity
     // --- MOVEMENT ---
     private void HandleMovement()
     {
-       if (agent.isStopped)
-           agent.isStopped = false;    
+        if (agent.isStopped)
+            agent.isStopped = false;
 
         if (currentTarget == null)
         {
@@ -192,7 +367,6 @@ public class Villager : Entity
                 return;
             }
             GoTo(new Vector2(currentTarget.transform.position.x, currentTarget.transform.position.z));
-            print("Go to task position");
         }
 
         float dist = Vector3.Distance(transform.position, currentTarget.transform.position);
@@ -223,19 +397,18 @@ public class Villager : Entity
         yield return new WaitUntil(() => ressourceManager.CantPickOtherRessource());
 
 
-        yield return PauseAfterTask(Random.Range((minPauseTime), maxPauseTime));
+        yield return PauseAfterTask(UnityEngine.Random.Range((minPauseTime), maxPauseTime));
     }
 
     private IEnumerator PauseAfterTask(float pauseTime)
     {
         currentState = VillagerState.Pausing;
 
-        Vector3 pauseDestination = transform.position + Random.insideUnitSphere * 2f;
+        Vector3 pauseDestination = transform.position + UnityEngine.Random.insideUnitSphere * 2f;
         pauseDestination.y = transform.position.y;
 
         agent.isStopped = false;
         GoTo(new Vector2(pauseDestination.x, pauseDestination.z));
-        print("GoTo pause Destination");
 
         while (Vector3.Distance(transform.position, pauseDestination) > 0.2f)
             yield return null;
@@ -264,6 +437,7 @@ public class Villager : Entity
             {
                 TaskType taskType = TaskManager.Instance.GetNextTask().taskType;
                 currentCityTask = taskType;
+                AssignNewOrderImage();
             }
         }
     }
@@ -313,7 +487,7 @@ public class Villager : Entity
         if (interactionRoutine != null)
             StopCoroutine(interactionRoutine);
 
-        StartCoroutine(PauseAfterTask(Random.Range((minPauseTime), maxPauseTime)));
+        StartCoroutine(PauseAfterTask(UnityEngine.Random.Range((minPauseTime), maxPauseTime)));
     }
 
 

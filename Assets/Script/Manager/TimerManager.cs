@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public class TimerManager : MonoBehaviour
@@ -54,12 +55,20 @@ public class TimerManager : MonoBehaviour
     #endregion
 
     #region Cancel Timer
+
+    public static bool TimerExist(string id)
+    {
+        return _activeTimers.ContainsKey(id);
+    }
     public static void CancelTimer(string timerId) //Cancel Timer with ID 
     {
         if (_activeTimers.TryGetValue(timerId, out Coroutine coroutine))
         {
-            _helper.StopCoroutine(coroutine);
-            _activeTimers.Remove(timerId);
+            if (coroutine != null)
+            {
+                _helper.StopCoroutine(coroutine);
+                _activeTimers.Remove(timerId);
+            }
         }
         else
         {

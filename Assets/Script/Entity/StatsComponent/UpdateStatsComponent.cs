@@ -9,12 +9,17 @@ public class UpdateStatsComponent : MonoBehaviour
     [Header("TIMERS")]
     [SerializeField] private float eatingTime = 5f;
     [SerializeField] private float sleepingTime = 10f;
+    [SerializeField] private float LifeTimeSecond = /*10 * 60f*/ 10; //10minutes
 
     private void Awake()
     {
         villager = GetComponent<Villager>();
     }
 
+    private void Start()
+    {
+        TimerManager.StartTimer(LifeTimeSecond, new Action(() => villager.VillagerDeath())); //programme Death
+    }
     private void Update()
     {
         UpdateFullnessValue();

@@ -29,7 +29,6 @@ public class InteractibleStructure : MonoBehaviour
     public virtual void Interact(Villager villager)
     {
         InteractSong();
-        print(interactStructName);
     }
 
     public virtual void DestroyStructure()

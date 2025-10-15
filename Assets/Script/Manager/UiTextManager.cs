@@ -25,6 +25,12 @@ public class UiTextManager : MonoBehaviour
         EventBus.Unsubscribe<float>(EventType.UPDATE_UI_FaithFill, UpdateFaithSliderBar);
     }
 
+    private void Start()
+    {
+        UpdateFoodText(0);
+        UpdateWoodText(0);
+        UpdateNbsCitizenText(0);
+    }
     private void UpdateFoodText(int value)
     {
         foodText.text = value.ToString();

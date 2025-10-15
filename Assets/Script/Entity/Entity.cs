@@ -15,8 +15,8 @@ public class Entity : MonoBehaviour
         if (TryGetComponent<NavMeshAgent>(out NavMeshAgent NavAgent))
         {
             agent = NavAgent;
+            agent.updateRotation = false;
         }
-        print($"Initialize {entityStats.GetEntityName()} ");
         return true;
     }
     public void GoTo(Vector2 target)

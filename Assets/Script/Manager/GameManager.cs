@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace GodGame
 {
@@ -55,6 +54,9 @@ namespace GodGame
 
             RessourceLocator.Initialize();
             RegisterAllRessourcesInScene();
+
+            navMesh.BuildNavMesh();
+
         }
 
         private void OnEnable()
@@ -69,6 +71,18 @@ namespace GodGame
 
 
         public Dictionary<Vector3, City> GetAllCity() => cities;
+        public List<Vector3> GetAllCityPos()
+        {
+            List<Vector3> citiesPos = new List<Vector3>();
+            foreach (var pos in cities.Keys)
+            {
+                if (citiesPos.Contains(pos)) continue;
+
+                citiesPos.Add(pos);
+            }
+            return citiesPos;
+        }
+        public City GetCityByPos(Vector3 pos) => cities[pos];
 
         public City GetNearestCity(Vector3 position, float maxDistance = 50f)
         {
@@ -164,7 +178,7 @@ namespace GodGame
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, placementLayers))
             {
                 GameObject newObject = Instantiate(PrefabToInstantiate,
-                    hit.point + new Vector3(0, PrefabToInstantiate.transform.localScale.y / 2, 0), Quaternion.identity, prefabParent);
+                    hit.point /*+ new Vector3(0, PrefabToInstantiate.transform.localScale.y / 2, 0)*/, Quaternion.identity, prefabParent);
 
                 if (newObject != null)
                 {
@@ -178,17 +192,18 @@ namespace GodGame
                         {
                             AllTree.Add(woods);
                         }
-                        else if(ressource is RessourceFoodBush foodBush)
+                        else if (ressource is RessourceFoodBush foodBush)
                         {
                             AllFoodBush.Add(foodBush);
                         }
+                        navMesh.BuildNavMesh();
                     }
                 }
             }
             isPlacingBuilding = false;
             PrefabToInstantiate = null;
         }
-        
+
 
         private void CancelPlacement()
         {
