@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 825885a47463b7142b06dac5659686f7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1ea767cc70a7acd4fbac8801af8e783e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -298,12 +298,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2681918452039266318}
-  - component: {fileID: -3531522115896338929}
   - component: {fileID: 3732197065339880628}
   - component: {fileID: 2560699622255713647}
   - component: {fileID: 3547419723806246703}
   m_Layer: 0
-  m_Name: FoodBush
+  m_Name: Bush
   m_TagString: Farm
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -325,25 +324,6 @@ Transform:
   - {fileID: 4559990730017470173}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-3531522115896338929
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9047338596619700558}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 779ebaaa44da4ab49b439b11c936df48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RessourceFoodBush
-  interactStructName: 
-  buildingWorldPos: {x: 0, y: 0}
-  type: 1
-  interactAudio: {fileID: 0}
-  interactAudioPlayTime: 0
-  totalRessources: 15
-  gatherInterval: 1.5
 --- !u!114 &3732197065339880628
 MonoBehaviour:
   m_ObjectHideFlags: 0

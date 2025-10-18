@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -15,6 +16,20 @@ namespace GodGame
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
+
+        [Header("FadeOut")]
+        [SerializeField] private float fadeOutTime;
+        [SerializeField] private CanvasGroup canvasGroup;
+
+
+
+
+        [SerializeField] private Texture2D cursor;
+
+
+
+
+
 
         [Header("Game Settings")]
         public float TaskMaxTime = 15f;
@@ -39,6 +54,7 @@ namespace GodGame
         [SerializeField] private SpawnablePrefab Rock;
 
         [SerializeField] private LayerMask placementLayers;
+        [SerializeField] public float baseYHeight;
 
 
         [SerializeField] public NavMeshSurface navMesh;
@@ -47,15 +63,41 @@ namespace GodGame
         private Transform prefabParent;
         private bool isPlacingBuilding = false;
 
+        public void StartFadeOut()
+        {
+            StartCoroutine(FadeOutRoutine());
+        }
+        private IEnumerator FadeOutRoutine()
+        {
+            float t = 0;
+            while (t < fadeOutTime)
+            {
+                t += Time.deltaTime;
+                canvasGroup.alpha = Mathf.Lerp(1f, 0f, t / fadeOutTime);
+                yield return null;
+            }
+        }
+
+
+        private void Start()
+        {
+            Cursor.SetCursor(cursor, Vector2.zero, CursorMode.Auto);
+        }
+
+
         private void Awake()
         {
+            StartFadeOut();
+
+
+
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
 
             RessourceLocator.Initialize();
             RegisterAllRessourcesInScene();
 
-            navMesh.BuildNavMesh();
+           // navMesh.BuildNavMesh();
 
         }
 
@@ -202,7 +244,7 @@ namespace GodGame
                         {
                             AllFoodBush.Add(foodBush);
                         }
-                        navMesh.BuildNavMesh();
+                        //navMesh.BuildNavMesh();
                     }
                 }
             }

@@ -249,7 +249,7 @@ public class Villager : Entity
         }
         else
         {
-            Vector3 newCityPos = transform.position;
+            Vector3 newCityPos = UnityEngine.Random.insideUnitSphere * 2 + new Vector3(transform.position.x, GameManager.Instance.baseYHeight, transform.position.z);
             AssignedCity = gm.CreateNewCity(newCityPos);
             AssignedCity.AddCitizen(this);
         }

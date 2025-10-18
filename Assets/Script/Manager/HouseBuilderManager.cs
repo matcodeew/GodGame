@@ -10,8 +10,8 @@ namespace GodGame
         [SerializeField] private float buildCheckInterval = 5f;
         [SerializeField] private int woodCostPerHouse = 20;
         [SerializeField] private float minDistanceBetweenHouses = 8f;
-        [SerializeField] private float buildRadiusMin = 10f;
-        [SerializeField] private float buildRadiusMax = 20f;
+        [SerializeField] private float buildRadiusMin = 5f;
+        [SerializeField] private float buildRadiusMax = 10f;
 
         private City city;
         private float nextBuildCheckTime = 0f;
@@ -84,7 +84,7 @@ namespace GodGame
             var go = Instantiate(housePrefab, position, Quaternion.identity, GameManager.Instance.House.parent);
             if (go.TryGetComponent(out House house))
             {
-                GameManager.Instance.navMesh.BuildNavMesh();
+                //GameManager.Instance.navMesh.BuildNavMesh();
                 city.houses.Add(house);
                 house.Initialize(city);
                 city.cityStats.maxPopulation += 5;
